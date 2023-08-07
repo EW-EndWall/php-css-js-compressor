@@ -27,10 +27,12 @@ function compressCSS($cssContent)
         return ''; //* An empty string may be returned or error handling may occur when compression fails.
     }
 }
-function compressAndSaveFiles($sourceDir, $outputDir, $explanation)
+function compressAndSaveFiles($sourceDir, $outputDir, $fileName, $explanation)
 {
     $cssContent = '';
+    $cssContentMin = '';
     $jsContent = '';
+    $jsContentMin = '';
 
     if (!file_exists($outputDir)) {
         mkdir($outputDir, 0777, true);
@@ -43,40 +45,61 @@ function compressAndSaveFiles($sourceDir, $outputDir, $explanation)
 
             // * Remove comments and unnecessary whitespaces from CSS
             if ($file->getExtension() === 'css') {
+                // * css raw
+                $cssContent .= trim($content) . PHP_EOL;
+
+                // * css min
                 // * Remove CSS comments
                 $content = preg_replace('!/\*.*?\*/!s', '', $content);
                 // * Replace multiple whitespaces with a single space
                 $content = preg_replace('/\s+/', ' ', $content);
                 // * Remove unnecessary whitespaces
                 $content = str_replace([': ', ', ', '; ', ' {', '{ ', '} '], [':', ',', ';', '{', '{', '}'], $content);
-                $cssContent .= trim($content) . PHP_EOL;
+                $cssContentMin .= trim($content) . PHP_EOL;
             }
 
             // * Remove comments and unnecessary whitespaces from JS
             if ($file->getExtension() === 'js') {
+                // * js raw
+                $jsContent .= trim($content) . PHP_EOL;
+
+                // * js min
                 // * Remove JS comments
                 $content = preg_replace('/(?:(?:\/\*(?:[^*]|(?:\*+[^*\/]))*\*+\/)|(?:\/\/.*))/', '', $content);
                 // * Replace horizontal whitespaces with a single space
                 $content = preg_replace('/\h+/', ' ', $content);
                 // * Remove vertical whitespaces
                 $content = preg_replace('/\v+/', '', $content);
-                $jsContent .= trim($content) . PHP_EOL;
+                $jsContentMin .= trim($content) . PHP_EOL;
             }
         }
     }
 
     // * css compress
-    // $cssContent = compressCSS($cssContent);
+    // $cssContentMin = compressCSS($cssContentMin);
 
+    // * css raw write
     if (!empty($cssContent)) {
-        $cssFile = fopen($outputDir . '/bClass-all-min.css', 'w');
+        $cssFile = fopen($outputDir . '/' . $fileName . '-all.css', 'w');
         fwrite($cssFile, $explanation . $cssContent);
         fclose($cssFile);
     }
-
+    // * js raw write
     if (!empty($jsContent)) {
-        $jsFile = fopen($outputDir . '/bClass-all-min.js', 'w');
+        $jsFile = fopen($outputDir . '/' . $fileName . '-all.js', 'w');
         fwrite($jsFile, $explanation . $jsContent);
+        fclose($jsFile);
+    }
+    // * css min write
+    if (!empty($cssContentMin)) {
+        $cssFile = fopen($outputDir . '/' . $fileName . '-all-min.css', 'w');
+        fwrite($cssFile, $explanation . $cssContentMin);
+        fclose($cssFile);
+    }
+    // * js min write
+    if (!empty($jsContentMin)) {
+        $jsFile = fopen($outputDir . '/' . $fileName . '-all-min.js', 'w');
+        fwrite($jsFile, $explanation . $jsContentMin);
         fclose($jsFile);
     }
 }
@@ -90,5 +113,6 @@ $explanation = '/*  * * example v1.0.0 (--)
 ';
 $sourceDirectory = './all-min';
 $outputDirectory = './all';
+$fileName = 'example';
 
-compressAndSaveFiles($sourceDirectory, $outputDirectory, $explanation);
+compressAndSaveFiles($sourceDirectory, $outputDirectory, $fileName, $explanation);
