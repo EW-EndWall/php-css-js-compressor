@@ -70,6 +70,8 @@ function compressAndSaveFiles($sourceDir, $outputDir, $fileName, $explanation)
                 $content = preg_replace('/\h+/', ' ', $content);
                 // * Remove vertical whitespaces
                 $content = preg_replace('/\v+/', '', $content);
+                // * Remove extra spaces around specific characters
+                $content = preg_replace('/\s*([{}:;,()=<>+\-*\/])\s*/', '$1', $content);
                 $jsContentMin .= trim($content) . PHP_EOL;
             }
         }
