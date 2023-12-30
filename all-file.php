@@ -27,7 +27,7 @@ function compressCSS($cssContent)
         return ''; //* An empty string may be returned or error handling may occur when compression fails.
     }
 }
-function compressAndSaveFiles($sourceDir, $outputDir, $fileName, $explanation)
+function compressAndSaveFiles($sourceDir, $outputDir, $fileName, $explanation, $data_contributors_clear)
 {
     $cssContent = '';
     $cssContentMin = '';
@@ -50,11 +50,23 @@ function compressAndSaveFiles($sourceDir, $outputDir, $fileName, $explanation)
 
                 // * css min
                 // * Remove CSS comments
-                $content = preg_replace('!/\*.*?\*/!s', '', $content);
+                if ($data_contributors_clear) {
+                    // $content = preg_replace('!/\*.*?\*/!s', '', $content);
+                    $content = preg_replace('/\/\*.*?\*\//s', '', $content);
+                } else {
+                    // * Remove CSS comments except the ones starting with "/* *"
+                    $content = preg_replace('/\/\*(?!\s*\*)(.|\n)*?\*\//s', '', $content);
+                }
                 // * Replace multiple whitespaces with a single space
                 $content = preg_replace('/\s+/', ' ', $content);
                 // * Remove unnecessary whitespaces
                 $content = str_replace([': ', ', ', '; ', ' {', '{ ', '} '], [':', ',', ';', '{', '{', '}'], $content);
+
+                // * comment edit
+                $content = preg_replace('/([^\/])\/\*/', "$1\n/*", $content);
+                $content = preg_replace('/\*\//', "*/\n", $content);
+                $content = preg_replace('/([^\/])\*\s*\*\s*/', "$1\n * * ", $content);
+
                 $cssContentMin .= trim($content) . PHP_EOL;
             }
 
@@ -65,13 +77,24 @@ function compressAndSaveFiles($sourceDir, $outputDir, $fileName, $explanation)
 
                 // * js min
                 // * Remove JS comments
-                $content = preg_replace('/(?:(?:\/\*(?:[^*]|(?:\*+[^*\/]))*\*+\/)|(?:\/\/.*))/', '', $content);
+                if ($data_contributors_clear) {
+                    // $content = preg_replace('/(?:(?:\/\*(?:[^*]|(?:\*+[^*\/]))*\*+\/)|(?:\/\/.*))/', '', $content);
+                    $content = preg_replace('/\/\*(.|[\r\n])*?\*\/|\/\/.*/', '', $content);
+                } else {
+                    $content = preg_replace('/\/\*(?!\s*\*)(.|\n)*?\*\/|\/\/(?!.*?\/\* *).*$/m', '', $content);
+                }
                 // * Replace horizontal whitespaces with a single space
                 $content = preg_replace('/\h+/', ' ', $content);
                 // * Remove vertical whitespaces
                 $content = preg_replace('/\v+/', '', $content);
                 // * Remove extra spaces around specific characters
                 $content = preg_replace('/\s*([{}:;,()=<>+\-*\/])\s*/', '$1', $content);
+
+                // * comment edit
+                $content = preg_replace('/([^\/])\/\*/', "$1\n/*", $content);
+                $content = preg_replace('/\*\//', "*/\n", $content);
+                $content = preg_replace('/([^\/])\*\s*\*\s*/', "$1\n * * ", $content);
+
                 $jsContentMin .= trim($content) . PHP_EOL;
             }
         }
@@ -113,8 +136,9 @@ $explanation = '/*  * * example v1.0.0 (--)
     * * Update (' . date('Y-m-d H:i:s') . ')
 */
 ';
+$data_contributors_clear = true;
 $sourceDirectory = './all-min';
 $outputDirectory = './all';
 $fileName = 'example';
 
-compressAndSaveFiles($sourceDirectory, $outputDirectory, $fileName, $explanation);
+compressAndSaveFiles($sourceDirectory, $outputDirectory, $fileName, $explanation, $data_contributors_clear);
