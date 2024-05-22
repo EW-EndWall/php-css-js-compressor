@@ -63,8 +63,13 @@ function compressAndSaveFiles($sourceDir, $outputDir, $fileName, $explanation, $
                 $content = str_replace([': ', ', ', '; ', ' {', '{ ', '} '], [':', ',', ';', '{', '{', '}'], $content);
 
                 // * comment edit
+                // * comment line skip
                 $content = preg_replace('/([^\/])\/\*/', "$1\n/*", $content);
+
+                // * line skip
                 $content = preg_replace('/\*\//', "*/\n", $content);
+
+                // * license line skip
                 $content = preg_replace('/([^\/])\*\s*\*\s*/', "$1\n * * ", $content);
 
                 $cssContentMin .= trim($content) . PHP_EOL;
@@ -91,8 +96,13 @@ function compressAndSaveFiles($sourceDir, $outputDir, $fileName, $explanation, $
                 $content = preg_replace('/\s*([{}:;,()=<>+\-*\/])\s*/', '$1', $content);
 
                 // * comment edit
+                // * comment line skip
                 $content = preg_replace('/([^\/])\/\*/', "$1\n/*", $content);
+
+                // * line skip
                 $content = preg_replace('/\*\//', "*/\n", $content);
+
+                // * license line skip
                 $content = preg_replace('/([^\/])\*\s*\*\s*/', "$1\n * * ", $content);
 
                 $jsContentMin .= trim($content) . PHP_EOL;
