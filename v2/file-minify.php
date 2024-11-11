@@ -22,7 +22,9 @@ function compressCSS($content, $data_contributors_clear)
         $content = preg_replace('/\/\*.*?\*\//s', '', $content);
     } else {
         // * Remove CSS comments except the ones starting with "/* *"
-        $content = preg_replace('/\/\*(?!\s*\*)(.|\n)*?\*\//s', '', $content);
+        // $content = preg_replace('/\/\*(?!\s*\*)(.|\n)*?\*\//s', '', $content);
+        // * Remove CSS comments except the ones starting with "/***"
+        $content = preg_replace('/\/\*(?!\s*\*\*)(.|\n)*?\*\//s', '', $content);
     }
     // * Replace multiple whitespaces with a single space
     $content = preg_replace('/\s+/', ' ', $content);
@@ -34,7 +36,8 @@ function compressCSS($content, $data_contributors_clear)
     // * line skip
     $content = preg_replace('/\*\//', "*/\n", $content);
     // * license line skip
-    $content = preg_replace('/([^\/])\*\s*\*\s*/', "$1\n * * ", $content);
+    // $content = preg_replace('/([^\/])\*\s*\*\s*/', "$1\n * * ", $content); // **
+    $content = preg_replace('/([^\/])\*\s\*\s(?!\*)/', "$1\n * * ", $content); // ***
     // * content min trim
     $contentMin = trim($content) . PHP_EOL;
 
@@ -49,21 +52,34 @@ function compressJS($content, $data_contributors_clear)
         // * Remove JS comments
         $content = preg_replace('/\/\*(.|[\r\n])*?\*\/|\/\/.*/', '', $content);
     } else {
-        $content = preg_replace('/\/\*(?!\s*\*)(.|\n)*?\*\/|\/\/(?!.*?\/\* *).*$/m', '', $content);
+        // * Remove CSS comments except the ones starting with "/* *"
+        // $content = preg_replace('/\/\*(?!\s*\*)(.|\n)*?\*\/|\/\/(?!.*?\/\* *).*$/m', '', $content);
+        // * Remove CSS comments except the ones starting with "/***"
+        // $content = preg_replace('/\/\*(?!\s*\*\*)(.|\n)*?\*\/|\/\/(?!.*?\/\* *).*$/m', '', $content);
+        // $content = preg_replace('/\/\*(?!\s*\*\*)(.|\n)*?\*\//s', '', $content);
+        $content = preg_replace('/\/\*(?!\s*\*\*)(.|\n)*?\*\/|^\s*\/\/.*$/m', '', $content);
     }
     // * Replace horizontal whitespaces with a single space
     $content = preg_replace('/\h+/', ' ', $content);
     // * Remove vertical whitespaces
     $content = preg_replace('/\v+/', '', $content);
     // * Remove extra spaces around specific characters
-    $content = preg_replace('/\s*([{}:;,()=<>+\-*\/])\s*/', '$1', $content);
+    // $content = preg_replace('/\s*([{}:;,()=<>+\-*\/])\s*/', '$1', $content);
+    $content = preg_replace_callback(
+        '#/\*\*\*.*?\*/|(\s*([{}:;,()=<>+\-*\/])\s*)#s',
+        function ($matches) {
+            return isset($matches[2]) ? $matches[2] : $matches[0];
+        },
+        $content
+    );
     // * comment edit
     // * comment line skip
     $content = preg_replace('/([^\/])\/\*/', "$1\n/*", $content);
     // * line skip
     $content = preg_replace('/\*\//', "*/\n", $content);
     // * license line skip
-    $content = preg_replace('/([^\/])\*\s*\*\s*/', "$1\n * * ", $content);
+    // $content = preg_replace('/([^\/])\*\s*\*\s*/', "$1\n * * ", $content); // **
+    $content = preg_replace('/([^\/])\*\s\*\s(?!\*)/', "$1\n * * ", $content); // ***
     // * content min trim
     $contentMin = trim($content) . PHP_EOL;
     return $contentMin;

@@ -1,0 +1,4 @@
+<FilesMatch "^(file-layout|file-minify)\.php$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>

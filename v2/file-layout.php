@@ -49,15 +49,15 @@ function getListVersionsJson($fileTitle, $data, $fileNameText)
     // * host path url
     $hostUrl = "https://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['REQUEST_URI']) . "/";
     // * all in css
-    $jsonOutput[$fileTitle . ".css"][] = [
+    $jsonOutput[$fileTitle . "-all" . ".css"][] = [
         $newVersion,
         $hostUrl . $fileTitle . "-all_" . $newVersion . ".css",
         $hostUrl . $fileTitle . "-all-min_" . $newVersion . ".css"
     ];
     // * all in js
-    $jsonOutput[$fileTitle . ".js"][] = [
+    $jsonOutput[$fileTitle . "-all" . ".js"][] = [
         $newVersion,
-        $hostUrl . $fileTitle . "_" . $newVersion . ".js",
+        $hostUrl . $fileTitle . "-all_" . $newVersion . ".js",
         $hostUrl . $fileTitle . "-all-min_" . $newVersion . ".js"
     ];
     // * JSON output
